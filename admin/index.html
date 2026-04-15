@@ -1,728 +1,224 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>D-Bank 관리자 — 와이어프레임 v3</title>
+<meta charset="UTF-8" />
+<title>D-Bank Admin</title>
+
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f5f5f5; color: #111; font-size: 13px; }
+body { font-family: sans-serif; }
 
-.app { display: flex; flex-direction: column; height: 100vh; }
-.gnb { height: 48px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; padding: 0 24px; flex-shrink: 0; }
-.main { display: flex; flex: 1; overflow: hidden; }
-.sidebar { width: 168px; background: #fff; border-right: 1px solid #e0e0e0; flex-shrink: 0; padding: 12px 0; }
-.content { flex: 1; overflow-y: auto; padding: 28px; background: #f5f5f5; }
+/* ===== 기존 스타일 일부 ===== */
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
 
-.gnb-logo { font-size: 15px; font-weight: 700; color: #111; letter-spacing: -0.3px; margin-right: auto; }
-.gnb-logo span { color: #2563EB; }
-.gnb-right { display: flex; align-items: center; gap: 14px; font-size: 12px; color: #666; }
-.gnb-avatar { width: 26px; height: 26px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #555; }
-.gnb-badge { font-size: 10px; background: #4c1d95; color: #fff; padding: 1px 6px; border-radius: 3px; }
-.gnb-logout { color: #bbb; cursor: pointer; }
-.gnb-logout:hover { color: #666; }
+.form-label-lg {
+  font-size: 18px;
+  font-weight: 700;
+}
 
-.sidebar-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; cursor: pointer; color: #555; }
-.sidebar-item:hover { background: #f3f4f6; color: #111; }
-.sidebar-item.active { background: #eff6ff; color: #1d4ed8; font-weight: 500; }
-.sidebar-dot { width: 6px; height: 6px; border-radius: 50%; background: #d1d5db; flex-shrink: 0; }
-.sidebar-item.active .sidebar-dot { background: #2563eb; }
-.sidebar-label { font-size: 10px; color: #bbb; padding: 12px 16px 4px; font-weight: 500; letter-spacing: 0.06em; }
+.form-hint {
+  font-size: 12px;
+  color: #aaa;
+}
 
-.view { display: none; }
-.view.active { display: block; }
+.form-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 12px;
+}
 
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-.page-title { font-size: 18px; font-weight: 600; color: #111; }
-.page-sub { font-size: 12px; color: #999; margin-top: 3px; }
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
 
-.btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #e0e0e0; background: #fff; color: #333; }
-.btn:hover { background: #f9fafb; }
-.btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
-.btn-primary:hover { background: #1e40af; }
-.btn-sm { padding: 4px 10px; font-size: 11px; }
-.btn-ghost { border-color: transparent; background: transparent; color: #888; }
-.btn-ghost:hover { background: #f3f4f6; color: #333; }
-.btn-danger-ghost { border-color: transparent; background: transparent; color: #dc2626; font-size: 11px; padding: 4px 8px; }
-.btn-danger-ghost:hover { background: #fef2f2; }
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 520px;
+}
 
-.table-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-.table-toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
-.search-box { display: flex; align-items: center; gap: 6px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 5px 10px; width: 220px; }
-.search-box input { border: none; outline: none; font-size: 12px; color: #333; background: transparent; width: 100%; }
-.search-icon { color: #bbb; font-size: 14px; }
-.filter-select { border: 1px solid #e5e7eb; border-radius: 6px; padding: 5px 10px; font-size: 12px; color: #444; background: #fff; outline: none; }
-table { width: 100%; border-collapse: collapse; }
-thead th { padding: 9px 16px; text-align: left; background: #fafafa; color: #888; font-weight: 500; font-size: 11px; border-bottom: 1px solid #eee; white-space: nowrap; }
-tbody td { padding: 11px 16px; border-bottom: 1px solid #f5f5f5; color: #333; vertical-align: middle; }
-tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: #fafafa; }
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
 
-.badge { display: inline-flex; align-items: center; font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 500; white-space: nowrap; }
-.badge-super { background: #ede9fe; color: #5b21b6; }
-.badge-admin { background: #dbeafe; color: #1e3a8a; }
-.badge-user  { background: #f0fdf4; color: #166534; }
-.type-tag { font-size: 11px; background: #f3f4f6; color: #555; padding: 2px 8px; border-radius: 3px; white-space: nowrap; display: inline-block; }
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+}
 
-.toggle { width: 34px; height: 19px; border-radius: 10px; position: relative; cursor: pointer; display: inline-block; flex-shrink: 0; }
-.toggle.on { background: #2563eb; }
-.toggle.off { background: #d1d5db; }
-.toggle::after { content: ''; position: absolute; width: 15px; height: 15px; background: #fff; border-radius: 50%; top: 2px; transition: left 0.15s; }
-.toggle.on::after { left: 17px; }
-.toggle.off::after { left: 2px; }
+.modal-body {
+  padding: 20px;
+}
 
-.role-select { border: 1px solid #e5e7eb; border-radius: 5px; padding: 4px 8px; font-size: 11px; background: #fff; color: #333; outline: none; cursor: pointer; }
-.role-select:focus { border-color: #93c5fd; }
-.role-select:disabled { background: #f9fafb; color: #aaa; cursor: default; }
+.modal-footer {
+  padding: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
 
-.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 14px; }
-.page-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 5px; font-size: 12px; cursor: pointer; background: #fff; color: #555; }
-.page-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
-.page-btn:hover:not(.active) { background: #f9fafb; }
+/* ===== 조직 선택 UI ===== */
+.org-col-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
 
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 100; align-items: center; justify-content: center; }
-.modal-overlay.open { display: flex; }
-.modal { background: #fff; border-radius: 10px; border: 1px solid #ddd; overflow: hidden; }
-.modal-sm { width: 420px; }
-.modal-header { padding: 18px 20px 14px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; justify-content: space-between; }
-.modal-title { font-size: 15px; font-weight: 600; }
-.modal-sub { font-size: 12px; color: #999; margin-top: 2px; }
-.modal-close { color: #ccc; font-size: 18px; cursor: pointer; line-height: 1; }
-.modal-close:hover { color: #666; }
-.modal-body { padding: 20px; max-height: 72vh; overflow-y: auto; }
-.modal-footer { padding: 12px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
+.org-panel {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
 
-.form-row { margin-bottom: 16px; }
-.form-row:last-child { margin-bottom: 0; }
-.form-label { font-size: 11px; font-weight: 500; color: #555; margin-bottom: 5px; }
-.req { color: #dc2626; }
-.form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; font-size: 13px; color: #111; outline: none; }
-.form-input:focus { border-color: #93c5fd; box-shadow: 0 0 0 2px #eff6ff; }
-.form-input:disabled { background: #f9fafb; color: #aaa; }
-.form-input.err { border-color: #fca5a5; }
-.form-select-full { width: 100%; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; font-size: 13px; color: #111; background: #fff; outline: none; }
-.form-hint { font-size: 11px; color: #aaa; margin-top: 4px; line-height: 1.5; }
-.form-errmsg { font-size: 11px; color: #dc2626; margin-top: 4px; display: none; }
+.org-item {
+  padding: 6px;
+  cursor: pointer;
+}
 
-.search-result { border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; background: #fff; }
-.search-result-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f5f5f5; }
-.search-result-item:last-child { border-bottom: none; }
-.search-result-item:hover { background: #f9fafb; }
-.result-name { font-size: 13px; font-weight: 500; }
-.result-email { font-size: 11px; color: #888; margin-top: 1px; }
-.result-selected { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
-.result-clear { color: #aaa; cursor: pointer; }
-.result-clear:hover { color: #666; }
+.org-item.active {
+  background: #eee;
+}
 
-.login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f0f2f5; }
-.login-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 40px 36px; width: 360px; }
-.login-logo { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; }
-.login-logo span { color: #2563eb; }
-.login-tagline { font-size: 12px; color: #bbb; text-align: center; margin-bottom: 28px; }
-.login-label { font-size: 11px; font-weight: 500; color: #555; margin-bottom: 5px; }
-.login-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 6px; padding: 9px 10px; font-size: 13px; color: #111; outline: none; margin-bottom: 10px; }
-.login-input:focus { border-color: #93c5fd; }
-.login-input.err { border-color: #fca5a5; margin-bottom: 0; }
-.login-errmsg { font-size: 11px; color: #dc2626; margin: 5px 0 8px; display: none; }
-.login-btn { width: 100%; padding: 10px; background: #1d4ed8; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; margin-top: 4px; }
-.login-btn:hover { background: #1e40af; }
-.divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: #ddd; font-size: 11px; }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
-.ms-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; font-size: 13px; color: #444; cursor: pointer; }
-.ms-btn:hover { background: #f9fafb; }
-.ms-icon { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5px; width: 16px; height: 16px; flex-shrink: 0; }
-.ms-icon span { border-radius: 1px; display: block; }
-.tbd { font-size: 10px; background: #fef9c3; color: #854d0e; padding: 1px 5px; border-radius: 3px; }
-.test-accounts { margin-top: 16px; padding: 10px 12px; background: #f8fafc; border-radius: 6px; font-size: 11px; color: #888; line-height: 1.8; }
+button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
 
-.pw-strength { display: flex; gap: 4px; margin-top: 6px; }
-.pw-bar { flex: 1; height: 3px; border-radius: 2px; background: #e5e7eb; transition: background 0.2s; }
-.pw-label { font-size: 10px; color: #aaa; margin-top: 3px; }
-.confirm-desc { font-size: 13px; color: #444; line-height: 1.6; }
-.confirm-target { font-weight: 600; color: #111; }
+.primary {
+  background: #2563eb;
+  color: white;
+}
+
 </style>
 </head>
+
 <body>
 
-<!-- ===== LOGIN ===== -->
-<div id="screen-login" class="login-screen">
-  <div class="login-card">
-    <div class="login-logo"><span>D-Bank</span></div>
-    <div class="login-tagline">관리자 페이지</div>
+<button onclick="openModal('modal-create')">계정 추가</button>
 
-    <div class="login-label">이메일</div>
-    <input class="login-input" id="login-email" type="email" placeholder="이메일 입력" onkeydown="if(event.key==='Enter')doLogin()">
-
-    <div class="login-label">비밀번호</div>
-    <input class="login-input" id="login-pw" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="login-errmsg" id="login-errmsg"></div>
-
-    <button class="login-btn" onclick="doLogin()">로그인</button>
-
-    <div class="divider">또는</div>
-    <button class="ms-btn">
-      <div class="ms-icon">
-        <span style="background:#F25022;"></span><span style="background:#7FBA00;"></span>
-        <span style="background:#00A4EF;"></span><span style="background:#FFB900;"></span>
-      </div>
-      Microsoft 365 로그인 <span class="tbd">TBD</span>
-    </button>
-  </div>
-</div>
-
-<!-- ===== APP ===== -->
-<div id="screen-app" class="app" style="display:none;">
-
-  <div class="gnb">
-    <div class="gnb-logo"><span>D-Bank</span> 관리자</div>
-    <div class="gnb-right">
-      <!-- 임시 권한 전환 메뉴 -->
-      <div style="display:flex;align-items:center;gap:6px;padding:3px 8px 3px 10px;background:#fef9c3;border:1px solid #fde68a;border-radius:6px;font-size:11px;color:#854d0e;">
-        <span>권한 전환</span>
-        <select id="role-switcher" onchange="switchRole(this.value)" style="border:none;background:transparent;font-size:11px;color:#854d0e;font-weight:500;outline:none;cursor:pointer;">
-          <option value="super">슈퍼어드민</option>
-          <option value="admin">관리자</option>
-          <option value="user">사용자</option>
-        </select>
-      </div>
-      <div style="width:1px;height:16px;background:#e5e7eb;"></div>
-      <div class="gnb-avatar" id="gnb-avatar">김</div>
-      <span id="gnb-name">김관리자</span>
-      <span class="gnb-badge" id="gnb-badge">슈퍼어드민</span>
-      <span class="gnb-logout" onclick="goLogin()">로그아웃</span>
-    </div>
-  </div>
-
-  <div class="main">
-    <div class="sidebar">
-      <div class="sidebar-label">계정 관리</div>
-      <div class="sidebar-item active" id="nav-accounts" onclick="showView('accounts')">
-        <div class="sidebar-dot"></div> 계정 목록
-      </div>
-    </div>
-
-    <div class="content">
-      <div id="view-accounts" class="view active">
-        <div class="page-header">
-          <div>
-            <div class="page-title">계정 목록</div>
-            <div class="page-sub" id="account-sub">관리자 계정 전체 8명</div>
-          </div>
-          <button class="btn btn-primary" id="btn-add-account" onclick="openCreateModal()">+ 계정 추가</button>
-        </div>
-
-        <div id="access-notice" style="display:none;align-items:center;gap:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:9px 14px;margin-bottom:14px;font-size:12px;color:#92400e;">
-          사용자 권한으로는 계정 관리 기능에 접근할 수 없습니다. 관리자에게 문의하세요.
-        </div>
-
-        <div class="table-wrap">
-          <div class="table-toolbar">
-            <div class="search-box">
-              <span class="search-icon">⌕</span>
-              <input type="text" placeholder="이름 또는 이메일 검색" oninput="filterTable(this.value)">
-            </div>
-            <select class="filter-select" onchange="filterRole(this.value)">
-              <option value="">권한 유형</option>
-              <option value="super">슈퍼어드민</option>
-              <option value="admin">관리자</option>
-              <option value="user">사용자</option>
-            </select>
-            <select class="filter-select" onchange="filterType(this.value)">
-              <option value="">계정 유형</option>
-              <option value="뉴드림스">뉴드림스</option>
-              <option value="생성 계정">생성 계정</option>
-            </select>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width:36px;text-align:center;color:#ccc;">#</th>
-                <th style="width:100px;">이름</th>
-                <th>이메일</th>
-                <th style="width:82px;">계정 유형</th>
-                <th style="width:100px;">조직 정보</th>
-                <th style="width:148px;">권한 유형</th>
-                <th style="width:96px;">계정 등록일</th>
-                <th style="width:72px;text-align:center;">계정 활성</th>
-              </tr>
-            </thead>
-            <tbody id="account-tbody"></tbody>
-          </table>
-        </div>
-        <div class="pagination">
-          <div class="page-btn">‹</div>
-          <div class="page-btn active">1</div>
-          <div class="page-btn">2</div>
-          <div class="page-btn">›</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: 계정 추가 -->
+<!-- ===== 계정 추가 ===== -->
 <div id="modal-create" class="modal-overlay">
-  <div class="modal modal-sm">
+  <div class="modal">
     <div class="modal-header">
-      <div>
-        <div class="modal-title">계정 추가</div>
-        <div class="modal-sub">디뱅크 계정을 생성합니다.</div>
-      </div>
-      <span class="modal-close" onclick="closeModal('modal-create')">✕</span>
+      <div class="modal-title">계정 추가</div>
     </div>
+
     <div class="modal-body">
+
       <!-- 아이디 -->
-      <div class="form-row">
-        <div class="form-label">아이디 <span class="req">*</span></div>
-        <input class="form-input" type="text" id="create-userid" placeholder="영문 소문자로 시작, 6~20자" oninput="validateUserId()">
-        <div class="form-errmsg" id="userid-err"></div>
-        <div class="form-hint">영문 소문자·숫자·._- 사용 가능, 영문 소문자로 시작</div>
-      </div>
-      <!-- 비밀번호 -->
-      <div class="form-row">
-        <div class="form-label">비밀번호 <span class="req">*</span></div>
-        <input class="form-input" type="password" id="create-pw" placeholder="8자 이상, 영문·숫자·특수문자 포함" oninput="checkPw()">
-        <div class="pw-strength">
-          <div class="pw-bar" id="bar1"></div>
-          <div class="pw-bar" id="bar2"></div>
-          <div class="pw-bar" id="bar3"></div>
-          <div class="pw-bar" id="bar4"></div>
-        </div>
-        <div class="pw-label" id="pw-label">강도: —</div>
-        <div class="form-errmsg" id="pw-err"></div>
-        <div class="form-hint">8자 이상, 영문·숫자·특수문자 각 1개 이상 필수</div>
-      </div>
-      <!-- 뉴드림스 검색 (관리자일 때) -->
-      <div id="create-org-section">
-        <div class="form-row">
-          <div class="form-label">팀 또는 센터명 입력 <span class="req">*</span></div>
-          <div class="search-box" style="width:100%;max-width:100%;">
-            <span class="search-icon">⌕</span>
-            <input type="text" id="newdreams-search" placeholder="이름 또는 이메일 입력" oninput="showSearchResult(this.value)">
-          </div>
-          <div id="search-result-area" style="margin-top:4px;"></div>
-          <div class="form-hint">계정의 뉴드림스 조직 정보를 입력해 주세요.</div>
-        </div>
-        <div class="form-row" id="selected-account-row" style="display:none;">
-          <div class="form-label">선택된 계정</div>
-          <div class="result-selected">
-            <div>
-              <div class="result-name" id="sel-name"></div>
-              <div class="result-email" id="sel-email"></div>
-            </div>
-            <span class="result-clear" onclick="clearSelected()">✕</span>
-          </div>
-        </div>
-      </div>
-      <!-- 이메일/이름 (사용자일 때) -->
-      <div id="create-email-section" style="display:none;">
-        <div class="form-row">
-          <div class="form-label">이메일 <span class="req">*</span></div>
-          <input class="form-input" type="email" id="create-email" placeholder="사용자 이메일 입력">
-          <div class="form-hint">입력한 이메일로 사용자 계정이 생성됩니다</div>
-        </div>
-        <div class="form-row">
-          <div class="form-label">이름 <span class="req">*</span></div>
-          <input class="form-input" type="text" id="create-name" placeholder="이름 입력">
-        </div>
-      </div>
-      <!-- 권한 유형 -->
-      <div class="form-row">
-        <div class="form-label">권한 유형 <span class="req">*</span></div>
-        <select class="form-select-full" id="create-role" onchange="onCreateRoleChange(this.value)">
-          <option value="admin">관리자</option>
-          <option value="user">사용자</option>
-        </select>
-        <div class="form-hint">권한 유형에 따라 디뱅크 메뉴 접근이 제한됩니다.</div>
-      </div>
+      <div class="form-label form-label-lg">아이디 *</div>
+      <input class="form-input" placeholder="영문 소문자로 시작, 6~20자">
+      <div class="form-hint">영문 소문자·숫자 사용</div>
+
+      <br>
+
+      <!-- 조직 검색 -->
+      <div class="form-label form-label-lg">조직 검색 *</div>
+      <input
+        class="form-input"
+        readonly
+        onclick="openModal('modal-org')"
+      >
+
     </div>
+
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modal-create')">취소</button>
-      <button class="btn btn-primary" onclick="createAccount()">추가</button>
+      <button onclick="closeModal('modal-create')">취소</button>
+      <button class="primary">추가</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: 계정 수정 -->
-<div id="modal-edit" class="modal-overlay">
-  <div class="modal modal-sm">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">계정 수정</div>
-        <div class="modal-sub" id="edit-modal-sub">-</div>
-      </div>
-      <span class="modal-close" onclick="closeModal('modal-edit')">✕</span>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-label">이름</div>
-        <input class="form-input" id="edit-name" disabled>
-        <div class="form-hint">뉴드림스 계정 정보는 직접 수정할 수 없습니다</div>
-      </div>
-      <div class="form-row">
-        <div class="form-label">이메일</div>
-        <input class="form-input" id="edit-email" disabled>
-      </div>
-      <div class="form-row">
-        <div class="form-label">권한 유형</div>
-        <select class="form-select-full" id="edit-role">
-          <option value="admin">관리자</option>
-          <option value="user">사용자</option>
-        </select>
-        <div class="form-hint" id="edit-role-hint">관리자 또는 사용자로 변경할 수 있습니다</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger-ghost" onclick="confirmRemove()">권한 회수</button>
-      <button class="btn" onclick="closeModal('modal-edit')">취소</button>
-      <button class="btn btn-primary" onclick="saveEdit()">저장</button>
-    </div>
-  </div>
-</div>
+<!-- ===== 조직 선택 ===== -->
+<div id="modal-org" class="modal-overlay">
+  <div class="modal" style="width: 1200px;">
 
-<!-- MODAL: 권한 회수 확인 -->
-<div id="modal-confirm" class="modal-overlay">
-  <div class="modal" style="width:360px;">
     <div class="modal-header">
-      <div class="modal-title">권한 회수</div>
-      <span class="modal-close" onclick="closeModal('modal-confirm')">✕</span>
+      <div class="modal-title">조직 검색</div>
     </div>
+
     <div class="modal-body">
-      <div class="confirm-desc">
-        <span class="confirm-target" id="confirm-target-name"></span>의 관리자 권한을 회수하시겠습니까?<br>
-        해당 계정은 D-Bank 관리자 페이지에 접근할 수 없게 됩니다.
+
+      <div style="display:grid; grid-template-columns: repeat(5,1fr); gap:10px;">
+
+        <div>
+          <div class="org-col-title">본부</div>
+          <div class="org-panel">
+            <div class="org-item active">대교 서울서북본부</div>
+            <div class="org-item">대교 서울강원본부</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="org-col-title">교육국</div>
+          <div class="org-panel">
+            <div class="org-item active">대교 일산동부 Hive</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="org-col-title">팀</div>
+          <div class="org-panel">
+            <div class="org-item active">001</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="org-col-title">채널</div>
+          <div class="org-panel">
+            <div class="org-item active">[YC]호수백신</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="org-col-title">선생님</div>
+          <div class="org-panel">
+            <div class="org-item">김진경</div>
+            <div class="org-item">정호선</div>
+          </div>
+        </div>
+
       </div>
+
     </div>
+
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modal-confirm')">취소</button>
-      <button class="btn btn-primary" style="background:#dc2626;border-color:#dc2626;" onclick="doRemove()">회수</button>
+      <button onclick="closeModal('modal-org')">취소</button>
+      <button class="primary" onclick="applyOrg()">확인</button>
     </div>
+
   </div>
 </div>
 
 <script>
-/* ── 테스트 계정 DB ── */
-const USER_DB = [
-  { email:'super@dbank.kr', pw:'Super1234!', role:'super', name:'김슈퍼',   avatar:'김' },
-  { email:'admin@dbank.kr', pw:'Admin1234!', role:'admin', name:'이관리자', avatar:'이' },
-  { email:'user@dbank.kr',  pw:'User1234!',  role:'user',  name:'박사용자', avatar:'박' },
-];
-
-const ROLE_INFO = {
-  super:{ label:'슈퍼어드민', bg:'#4c1d95' },
-  admin:{ label:'관리자',     bg:'#1e3a8a' },
-  user: { label:'사용자',     bg:'#166534' },
-};
-
-let currentRole = 'super';
-
-/* ── 계정 목록 ── */
-let accounts = [
-  { name:'김수현', email:'soohyun.kim@newdreams.kr', type:'뉴드림스',  org:'본사 스텝',  role:'super', active:true,  date:'2024.01.10' },
-  { name:'이지원', email:'jiwon.lee@newdreams.kr',   type:'뉴드림스',  org:'수리개발팀', role:'admin', active:true,  date:'2024.01.15' },
-  { name:'박민준', email:'minjun.park@newdreams.kr', type:'뉴드림스',  org:'수리개발팀', role:'user',  active:true,  date:'2024.02.03' },
-  { name:'최유나', email:'yuna.choi@newdreams.kr',   type:'뉴드림스',  org:'본사 스텝',  role:'super', active:true,  date:'2024.02.10' },
-  { name:'정다은', email:'daeun.jung@newdreams.kr',  type:'뉴드림스',  org:'수리개발팀', role:'user',  active:true,  date:'2024.03.01' },
-  { name:'한지호', email:'jiho.han@newdreams.kr',    type:'생성 계정', org:'—',          role:'admin', active:true,  date:'2024.03.15' },
-  { name:'강서연', email:'seoyeon.kang@newdreams.kr',type:'생성 계정', org:'—',          role:'user',  active:false, date:'2024.04.01' },
-  { name:'윤태양', email:'taeyang.yoon@newdreams.kr',type:'뉴드림스',  org:'본사 스텝',  role:'super', active:true,  date:'2024.04.10' },
-  { name:'박사용자', email:'user@dbank.kr',           type:'생성 계정', org:'—',          role:'user',  active:true,  date:'2024.04.15' },
-];
-
-const newdreamsPool = [
-  { name:'김민서', email:'minseo.kim@newdreams.kr' },
-  { name:'오준혁', email:'junhyuk.oh@newdreams.kr' },
-  { name:'배소연', email:'soyeon.bae@newdreams.kr' },
-  { name:'임재원', email:'jaewon.lim@newdreams.kr' },
-];
-
-let filterText='', filterRoleVal='', filterTypeVal='';
-let editIdx=-1, selectedUser=null;
-
-function canEdit(){ return currentRole==='super'||currentRole==='admin'; }
-
-function getSorted(list){
-  const ns = list.filter(u=>u.role!=='super').sort((a,b)=>a.date.localeCompare(b.date));
-  const ss = list.filter(u=>u.role==='super').sort((a,b)=>a.date.localeCompare(b.date));
-  return [...ns,...ss];
+function openModal(id){
+  document.getElementById(id).style.display = 'flex';
 }
 
-function renderAccounts(){
-  const tbody = document.getElementById('account-tbody');
-  const filtered = accounts.filter(u=>{
-    const mt = !filterText || u.name.includes(filterText)||u.email.includes(filterText);
-    const mr = !filterRoleVal || u.role===filterRoleVal;
-    const my = !filterTypeVal || u.type===filterTypeVal;
-    return mt&&mr&&my;
-  });
-  const sorted = getSorted(filtered);
-  const total  = sorted.length;
-  tbody.innerHTML='';
-
-  sorted.forEach((u,idx)=>{
-    const i   = accounts.indexOf(u);
-    const num = total-idx;
-    const isS = u.role==='super';
-    const tr  = document.createElement('tr');
-
-    const roleCell = isS
-      ? `<span class="badge badge-super">슈퍼어드민</span>`
-      : (canEdit()
-          ? `<select class="role-select" onchange="changeRole(${i},this.value)">
-               <option value="admin" ${u.role==='admin'?'selected':''}>관리자</option>
-               <option value="user"  ${u.role==='user' ?'selected':''}>사용자</option>
-             </select>`
-          : `<span class="badge ${u.role==='admin'?'badge-admin':'badge-user'}">${u.role==='admin'?'관리자':'사용자'}</span>`);
-
-    const activeCell = u.type==='뉴드림스'
-      ? `<span class="toggle on" style="cursor:default;opacity:0.45;" title="뉴드림스 계정은 항상 활성"></span>`
-      : (canEdit()
-          ? `<span class="toggle ${u.active?'on':'off'}" onclick="toggleActive(${i})"></span>`
-          : `<span class="toggle ${u.active?'on':'off'}" style="cursor:default;opacity:0.6;"></span>`);
-
-    tr.innerHTML=`
-      <td style="text-align:center;color:#ccc;font-size:11px;">${num}</td>
-      <td style="font-weight:500;">${u.name}</td>
-      <td style="color:#888;font-size:12px;">${u.email}</td>
-      <td><span class="type-tag">${u.type}</span></td>
-      <td style="color:#666;font-size:12px;">${u.org}</td>
-      <td>${roleCell}</td>
-      <td style="color:#aaa;font-size:12px;">${u.date}</td>
-      <td style="text-align:center;">${activeCell}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  document.getElementById('account-sub').textContent=`관리자 계정 전체 ${accounts.length}명`;
-  document.getElementById('btn-add-account').style.display=canEdit()?'':'none';
-  document.getElementById('access-notice').style.display=currentRole==='user'?'flex':'none';
+function closeModal(id){
+  document.getElementById(id).style.display = 'none';
 }
 
-function filterTable(v){ filterText=v; renderAccounts(); }
-function filterRole(v) { filterRoleVal=v; renderAccounts(); }
-function filterType(v) { filterTypeVal=v; renderAccounts(); }
-function changeRole(i,v){ accounts[i].role=v; renderAccounts(); }
-function toggleActive(i){ accounts[i].active=!accounts[i].active; renderAccounts(); }
-
-/* ── 수정 모달 ── */
-function openEdit(i){
-  editIdx=i;
-  const u=accounts[i];
-  document.getElementById('edit-modal-sub').textContent=u.email;
-  document.getElementById('edit-name').value=u.name;
-  document.getElementById('edit-email').value=u.email;
-  const sel=document.getElementById('edit-role');
-  sel.value=u.role==='super'?'admin':u.role;
-  sel.disabled=u.role==='super';
-  document.getElementById('edit-role-hint').textContent=u.role==='super'
-    ?'슈퍼어드민 권한은 백엔드에서만 변경할 수 있습니다'
-    :'관리자 또는 사용자로 변경할 수 있습니다';
-  openModal('modal-edit');
+function applyOrg(){
+  alert('조직 선택 완료');
+  closeModal('modal-org');
 }
-
-function saveEdit(){
-  if(editIdx<0)return;
-  const sel=document.getElementById('edit-role');
-  if(!sel.disabled) accounts[editIdx].role=sel.value;
-  renderAccounts();
-  closeModal('modal-edit');
-}
-
-function confirmRemove(){
-  document.getElementById('confirm-target-name').textContent=accounts[editIdx].name;
-  closeModal('modal-edit');
-  openModal('modal-confirm');
-}
-
-function doRemove(){
-  if(editIdx>=0) accounts.splice(editIdx,1);
-  editIdx=-1;
-  renderAccounts();
-  closeModal('modal-confirm');
-}
-
-/* ── 아이디 유효성 ── */
-function validateUserId(){
-  const el=document.getElementById('create-userid');
-  const v=el.value;
-  const errEl=document.getElementById('userid-err');
-  if(!v){ errEl.style.display='none'; el.classList.remove('err'); return true; }
-  const ok=/^[a-z][a-z0-9._\-]{5,19}$/.test(v);
-  if(!ok){
-    errEl.textContent='영문 소문자로 시작, 6~20자, 영문·숫자·._- 만 사용 가능합니다';
-    errEl.style.display='block'; el.classList.add('err'); return false;
-  }
-  errEl.style.display='none'; el.classList.remove('err'); return true;
-}
-
-/* ── 비밀번호 강도 ── */
-function checkPw(){
-  const v=document.getElementById('create-pw').value;
-  const colors=['#ef4444','#f97316','#eab308','#22c55e'];
-  const labels=['매우 약함','약함','보통','강함'];
-  let s=0;
-  if(v.length>=8)s++;
-  if(/[A-Za-z]/.test(v))s++;
-  if(/[0-9]/.test(v))s++;
-  if(/[^A-Za-z0-9]/.test(v))s++;
-  ['bar1','bar2','bar3','bar4'].forEach((id,i)=>{
-    document.getElementById(id).style.background=i<s?colors[s-1]:'#e5e7eb';
-  });
-  document.getElementById('pw-label').textContent=v?`강도: ${labels[s-1]||'매우 약함'}`:'강도: —';
-  const errEl=document.getElementById('pw-err');
-  if(v&&s<3){ errEl.textContent='비밀번호 강도가 부족합니다 (영문·숫자·특수문자 포함)'; errEl.style.display='block'; }
-  else errEl.style.display='none';
-  return s>=3;
-}
-
-/* ── 계정 추가 모달 ── */
-function onCreateRoleChange(v){
-  document.getElementById('create-org-section').style.display   = v==='admin'?'':'none';
-  document.getElementById('create-email-section').style.display = v==='user' ?'':'none';
-}
-
-function openCreateModal(){
-  clearSelected();
-  ['create-userid','create-pw','create-email','create-name'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  ['userid-err','pw-err'].forEach(id=>{ document.getElementById(id).style.display='none'; });
-  checkPw();
-  document.getElementById('create-role').value='admin';
-  onCreateRoleChange('admin');
-  openModal('modal-create');
-}
-
-function showSearchResult(v){
-  const area=document.getElementById('search-result-area');
-  if(!v){ area.innerHTML=''; return; }
-  const res=newdreamsPool.filter(p=>p.name.includes(v)||p.email.includes(v));
-  if(!res.length){ area.innerHTML='<div style="font-size:12px;color:#aaa;padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;">검색 결과 없음</div>'; return; }
-  area.innerHTML='<div class="search-result">'+res.map(r=>`<div class="search-result-item" onclick="selectUser('${r.name}','${r.email}')"><div class="result-name">${r.name}</div><div class="result-email">${r.email}</div></div>`).join('')+'</div>';
-}
-
-function selectUser(name,email){
-  selectedUser={name,email};
-  document.getElementById('search-result-area').innerHTML='';
-  document.getElementById('newdreams-search').value='';
-  document.getElementById('sel-name').textContent=name;
-  document.getElementById('sel-email').textContent=email;
-  document.getElementById('selected-account-row').style.display='block';
-}
-
-function clearSelected(){
-  selectedUser=null;
-  const row=document.getElementById('selected-account-row');
-  const ns=document.getElementById('newdreams-search');
-  const area=document.getElementById('search-result-area');
-  if(row) row.style.display='none';
-  if(ns)  ns.value='';
-  if(area)area.innerHTML='';
-}
-
-function createAccount(){
-  const uid  = document.getElementById('create-userid').value.trim();
-  const pw   = document.getElementById('create-pw').value;
-  const role = document.getElementById('create-role').value;
-
-  if(!validateUserId()||!uid){ alert('아이디를 올바르게 입력해주세요.'); return; }
-  if(!checkPw()||!pw){ alert('비밀번호 조건을 확인해주세요.'); return; }
-
-  const today=new Date();
-  const d=`${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
-
-  if(role==='admin'){
-    if(!selectedUser){ alert('뉴드림스 계정을 선택해주세요.'); return; }
-    accounts.push({name:selectedUser.name, email:selectedUser.email, type:'뉴드림스', org:'본사 스텝', role:'admin', active:true, date:d});
-    USER_DB.push({email:uid, pw, role:'admin', name:selectedUser.name, avatar:selectedUser.name[0]});
-  } else {
-    const email=document.getElementById('create-email').value.trim();
-    const name =document.getElementById('create-name').value.trim();
-    if(!email||!name){ alert('이름과 이메일을 입력해주세요.'); return; }
-    accounts.push({name, email, type:'생성 계정', org:'—', role:'user', active:true, date:d});
-    USER_DB.push({email:uid, pw, role:'user', name, avatar:name[0]});
-  }
-  clearSelected();
-  renderAccounts();
-  closeModal('modal-create');
-}
-
-/* ── 권한 전환 (임시 메뉴) ── */
-function switchRole(role){
-  currentRole = role;
-  const info  = ROLE_INFO[currentRole];
-  const users = { super:{name:'김슈퍼',avatar:'김'}, admin:{name:'이관리자',avatar:'이'}, user:{name:'박사용자',avatar:'박'} };
-  const u = users[role];
-  document.getElementById('gnb-avatar').textContent     = u.avatar;
-  document.getElementById('gnb-name').textContent       = u.name;
-  document.getElementById('gnb-badge').textContent      = info.label;
-  document.getElementById('gnb-badge').style.background = info.bg;
-  renderAccounts();
-}
-
-/* ── 로그인 ── */
-function doLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const pw=document.getElementById('login-pw').value;
-  const errEl=document.getElementById('login-errmsg');
-  document.getElementById('login-email').classList.remove('err');
-  document.getElementById('login-pw').classList.remove('err');
-  errEl.style.display='none';
-
-  // 입력값으로 계정 매칭, 없으면 슈퍼어드민으로 기본 로그인
-  const matched = email && pw ? USER_DB.find(u=>u.email===email&&u.pw===pw) : null;
-  const user = matched || USER_DB[0];
-
-  if(email && pw && !matched){
-    errEl.textContent='이메일 또는 비밀번호가 올바르지 않습니다.';
-    errEl.style.display='block';
-    document.getElementById('login-email').classList.add('err');
-    document.getElementById('login-pw').classList.add('err');
-    return;
-  }
-
-  // 사용자 권한은 관리자 페이지 로그인 불가
-  if(user.role==='user'){
-    errEl.textContent='관리자 페이지 접근 권한이 없습니다. 담당 관리자에게 문의하세요.';
-    errEl.style.display='block';
-    document.getElementById('login-email').classList.add('err');
-    document.getElementById('login-pw').classList.add('err');
-    return;
-  }
-
-  currentRole=user.role;
-  const info=ROLE_INFO[currentRole];
-  document.getElementById('gnb-avatar').textContent     =user.avatar;
-  document.getElementById('gnb-name').textContent       =user.name;
-  document.getElementById('gnb-badge').textContent      =info.label;
-  document.getElementById('gnb-badge').style.background =info.bg;
-  document.getElementById('role-switcher').value        =user.role;
-  document.getElementById('screen-login').style.display ='none';
-  document.getElementById('screen-app').style.display   ='flex';
-  renderAccounts();
-}
-
-/* ── 로그아웃 ── */
-function goLogin(){
-  document.getElementById('login-email').value='';
-  document.getElementById('login-pw').value='';
-  document.getElementById('login-errmsg').style.display='none';
-  document.getElementById('screen-app').style.display='none';
-  document.getElementById('screen-login').style.display='flex';
-}
-
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-
-function showView(name){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  const nav=document.getElementById('nav-'+name);
-  if(nav) nav.classList.add('active');
-}
-
-renderAccounts();
 </script>
+
 </body>
 </html>
