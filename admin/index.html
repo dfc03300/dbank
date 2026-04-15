@@ -1,108 +1,83 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<title>D-Bank Admin</title>
+<meta charset="UTF-8">
+<title>D-Bank 관리자</title>
 
 <style>
-body { font-family: sans-serif; }
+body { font-family: sans-serif; background:#f5f5f5; }
 
-/* ===== 기존 스타일 일부 ===== */
-.form-label {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
+/* ===== 라벨 / 인풋 ===== */
+.form-label { font-size:16px; font-weight:600; margin-bottom:8px; }
+.form-hint { font-size:12px; color:#b8b8b8; margin-top:6px; }
+.form-input { width:100%; height:56px; border:1px solid #ddd; border-radius:10px; padding:0 16px; font-size:15px; }
 
-.form-label-lg {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.form-hint {
-  font-size: 12px;
-  color: #aaa;
-}
-
-.form-input {
-  width: 100%;
-  height: 44px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0 12px;
-}
-
+/* ===== 모달 ===== */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: none;
-  align-items: center;
-  justify-content: center;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.4);
+  display:none; align-items:center; justify-content:center;
 }
+.modal-overlay.open { display:flex; }
 
 .modal {
-  background: #fff;
-  border-radius: 16px;
-  width: 520px;
+  background:#fff;
+  border-radius:16px;
+  width:720px;
 }
 
 .modal-header {
-  padding: 20px;
-  border-bottom: 1px solid #eee;
+  padding:20px;
+  border-bottom:1px solid #eee;
 }
 
 .modal-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size:20px;
+  font-weight:700;
 }
 
-.modal-body {
-  padding: 20px;
+.modal-body { padding:20px; }
+.modal-footer { padding:20px; display:flex; justify-content:flex-end; gap:10px; }
+
+/* ===== 버튼 ===== */
+.btn { padding:10px 18px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+.btn-primary { background:#2563eb; color:#fff; border:none; }
+
+/* ===== 조직 검색 트리거 ===== */
+.org-trigger {
+  display:flex; align-items:center;
+  height:56px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:0 16px;
+  cursor:pointer;
+}
+.org-trigger-placeholder { font-size:15px; }
+
+/* ===== 조직 모달 ===== */
+.org-modal {
+  width:1400px;
 }
 
-.modal-footer {
-  padding: 20px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-/* ===== 조직 선택 UI ===== */
-.org-col-title {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 10px;
+.org-grid {
+  display:grid;
+  grid-template-columns: repeat(5,1fr);
+  gap:20px;
 }
 
 .org-panel {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  height: 300px;
-  overflow-y: auto;
-  padding: 10px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  height:400px;
+  overflow:auto;
+  padding:10px;
 }
 
 .org-item {
-  padding: 6px;
-  cursor: pointer;
+  padding:8px;
+  cursor:pointer;
 }
-
-.org-item.active {
-  background: #eee;
-}
-
-button {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-.primary {
-  background: #2563eb;
-  color: white;
-}
+.org-item.active { background:#eee; }
 
 </style>
 </head>
@@ -114,6 +89,7 @@ button {
 <!-- ===== 계정 추가 ===== -->
 <div id="modal-create" class="modal-overlay">
   <div class="modal">
+
     <div class="modal-header">
       <div class="modal-title">계정 추가</div>
     </div>
@@ -121,32 +97,36 @@ button {
     <div class="modal-body">
 
       <!-- 아이디 -->
-      <div class="form-label form-label-lg">아이디 *</div>
+      <div class="form-label">아이디 *</div>
       <input class="form-input" placeholder="영문 소문자로 시작, 6~20자">
       <div class="form-hint">영문 소문자·숫자 사용</div>
 
       <br>
 
       <!-- 조직 검색 -->
-      <div class="form-label form-label-lg">조직 검색 *</div>
-      <input
-        class="form-input"
-        readonly
-        onclick="openModal('modal-org')"
-      >
+      <div class="form-label">조직 검색 *</div>
+      <div class="org-trigger" onclick="openModal('modal-org')">
+        <span id="org-text" class="org-trigger-placeholder">조직 검색</span>
+      </div>
+
+      <div id="selected" style="margin-top:10px; display:none;">
+        <b id="sel-name"></b>
+        <div id="sel-path" style="font-size:12px;color:#888;"></div>
+      </div>
 
     </div>
 
     <div class="modal-footer">
-      <button onclick="closeModal('modal-create')">취소</button>
-      <button class="primary">추가</button>
+      <button class="btn" onclick="closeModal('modal-create')">취소</button>
+      <button class="btn btn-primary">추가</button>
     </div>
+
   </div>
 </div>
 
-<!-- ===== 조직 선택 ===== -->
+<!-- ===== 조직 검색 ===== -->
 <div id="modal-org" class="modal-overlay">
-  <div class="modal" style="width: 1200px;">
+  <div class="modal org-modal">
 
     <div class="modal-header">
       <div class="modal-title">조직 검색</div>
@@ -154,43 +134,28 @@ button {
 
     <div class="modal-body">
 
-      <div style="display:grid; grid-template-columns: repeat(5,1fr); gap:10px;">
+      <div class="org-grid">
 
-        <div>
-          <div class="org-col-title">본부</div>
-          <div class="org-panel">
-            <div class="org-item active">대교 서울서북본부</div>
-            <div class="org-item">대교 서울강원본부</div>
-          </div>
+        <div class="org-panel">
+          <div class="org-item active" onclick="selectOrg('대교 서울서북본부')">대교 서울서북본부</div>
+          <div class="org-item">대교 서울강원본부</div>
         </div>
 
-        <div>
-          <div class="org-col-title">교육국</div>
-          <div class="org-panel">
-            <div class="org-item active">대교 일산동부 Hive</div>
-          </div>
+        <div class="org-panel">
+          <div class="org-item active">대교 일산동부 Hive</div>
         </div>
 
-        <div>
-          <div class="org-col-title">팀</div>
-          <div class="org-panel">
-            <div class="org-item active">001</div>
-          </div>
+        <div class="org-panel">
+          <div class="org-item active">001</div>
         </div>
 
-        <div>
-          <div class="org-col-title">채널</div>
-          <div class="org-panel">
-            <div class="org-item active">[YC]호수백신</div>
-          </div>
+        <div class="org-panel">
+          <div class="org-item active">[YC]호수백신</div>
         </div>
 
-        <div>
-          <div class="org-col-title">선생님</div>
-          <div class="org-panel">
-            <div class="org-item">김진경</div>
-            <div class="org-item">정호선</div>
-          </div>
+        <div class="org-panel">
+          <div class="org-item" onclick="selectOrg('김진경')">김진경</div>
+          <div class="org-item" onclick="selectOrg('정호선')">정호선</div>
         </div>
 
       </div>
@@ -198,26 +163,42 @@ button {
     </div>
 
     <div class="modal-footer">
-      <button onclick="closeModal('modal-org')">취소</button>
-      <button class="primary" onclick="applyOrg()">확인</button>
+      <button class="btn" onclick="closeModal('modal-org')">취소</button>
+      <button class="btn btn-primary" onclick="confirmOrg()">확인</button>
     </div>
 
   </div>
 </div>
 
 <script>
+
+let tempOrg = null;
+
 function openModal(id){
-  document.getElementById(id).style.display = 'flex';
+  document.getElementById(id).classList.add('open');
 }
 
 function closeModal(id){
-  document.getElementById(id).style.display = 'none';
+  document.getElementById(id).classList.remove('open');
 }
 
-function applyOrg(){
-  alert('조직 선택 완료');
+function selectOrg(name){
+  tempOrg = name;
+}
+
+function confirmOrg(){
+  if(!tempOrg){
+    alert('선택하세요');
+    return;
+  }
+
+  document.getElementById('org-text').textContent = tempOrg;
+  document.getElementById('sel-name').textContent = tempOrg;
+  document.getElementById('selected').style.display = 'block';
+
   closeModal('modal-org');
 }
+
 </script>
 
 </body>
