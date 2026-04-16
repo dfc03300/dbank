@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -365,21 +364,6 @@ tbody tr:hover td { background: #fafafa; }
           <input class="form-input" type="text" id="create-name" placeholder="이름 입력" style="padding:7px 10px;font-size:13px;">
         </div>
         <div style="border-top:1px solid #f0f0f0;margin:10px 0;"></div>
-        <div style="font-size:10px;font-weight:600;color:#bbb;letter-spacing:0.08em;margin-bottom:8px;">조직</div>
-        <div style="font-size:12px;font-weight:600;color:#111;margin-bottom:4px;">조직 검색 <span class="req">*</span></div>
-        <div class="org-search-trigger" onclick="openOrgModal()" style="padding:7px 12px;font-size:13px;margin-bottom:8px;">
-          <span id="org-selected-text" style="color:#aaa;">클릭하여 조직을 선택하세요</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="login-org-box" id="login-org-box" style="padding:9px 12px;">
-          <div style="font-size:12px;font-weight:600;color:#222;margin-bottom:6px;">내 조직에 만들기</div>
-          <label id="login-org-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#333;">
-            <input type="radio" name="org-quick" id="org-radio-login" onchange="selectLoginOrg()" style="accent-color:#1d4ed8;">
-            <span id="login-org-path" style="color:#555;"></span>
-          </label>
-          <div id="login-org-disabled-msg" style="display:none;"></div>
-        </div>
-        <div style="border-top:1px solid #f0f0f0;margin:10px 0;"></div>
         <div style="font-size:10px;font-weight:600;color:#bbb;letter-spacing:0.08em;margin-bottom:8px;">권한</div>
         <div style="font-size:12px;font-weight:600;color:#111;margin-bottom:4px;">권한 유형 <span class="req">*</span></div>
         <select class="form-select-full" id="create-role" style="padding:7px 10px;font-size:13px;">
@@ -390,19 +374,25 @@ tbody tr:hover td { background: #fafafa; }
         </div>
       </div>
 
-      <!-- 뉴드림스 권한 부여 -->
+      <!-- 뉴드림스 계정 -->
       <div id="section-nd" style="display:none;">
-        <div style="padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#92400e;margin-bottom:14px;">
-          조직 검색 팝업에서 <strong>선생님 컬럼</strong>을 통해 뉴드림스 계정을 선택하세요.
+        <div style="font-size:10px;font-weight:600;color:#bbb;letter-spacing:0.08em;margin-bottom:10px;">계정 검색</div>
+        <div style="font-size:12px;font-weight:600;color:#111;margin-bottom:4px;">이름, 사번, 이메일 검색 <span class="req">*</span></div>
+        <div style="position:relative;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;border:1px solid #e5e7eb;border-radius:6px;padding:7px 10px;background:#fff;">
+            <span style="color:#bbb;font-size:14px;">⌕</span>
+            <input type="text" id="nd-search-input" placeholder="이름, 사번, 이메일 검색" oninput="searchNdUsers(this.value)"
+              style="border:none;outline:none;font-size:13px;color:#333;background:transparent;width:100%;">
+          </div>
+          <div id="nd-search-result" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.08);z-index:10;max-height:180px;overflow-y:auto;margin-top:4px;"></div>
         </div>
-        <div style="font-size:12px;font-weight:600;color:#111;margin-bottom:4px;">조직 검색 <span class="req">*</span></div>
-        <div class="org-search-trigger" onclick="openOrgModal()" style="padding:7px 12px;font-size:13px;margin-bottom:8px;">
-          <span id="nd-org-selected-text" style="color:#aaa;">클릭하여 조직 검색 후 계정 선택</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div id="nd-selected-info" style="display:none;margin-bottom:12px;padding:9px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-          <div style="font-size:13px;font-weight:600;color:#1d4ed8;" id="nd-selected-name"></div>
-          <div style="font-size:11px;color:#666;margin-top:2px;" id="nd-selected-email"></div>
+        <div id="nd-selected-info" style="display:none;margin-bottom:12px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;display:none;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#1d4ed8;" id="nd-selected-name"></div>
+            <div style="font-size:11px;color:#666;margin-top:2px;" id="nd-selected-email"></div>
+            <div style="font-size:11px;color:#888;margin-top:1px;" id="nd-selected-org"></div>
+          </div>
+          <span onclick="clearNdSelected()" style="font-size:16px;color:#bbb;cursor:pointer;padding:0 4px;">✕</span>
         </div>
         <div style="border-top:1px solid #f0f0f0;margin:10px 0;"></div>
         <div style="font-size:10px;font-weight:600;color:#bbb;letter-spacing:0.08em;margin-bottom:8px;">권한</div>
@@ -551,15 +541,15 @@ let currentRole = 'super';
 
 /* ── 계정 목록 ── */
 let accounts = [
-  { name:'김수현',  email:'soohyun.kim@newdreams.kr',  type:'뉴드림스',  org:'본사 스텝',        role:'super', active:true,  regDate:'2024.01.10', modDate:'2024.03.05' },
-  { name:'이지원',  email:'jiwon.lee@newdreams.kr',    type:'뉴드림스',  org:'수리개발팀',       role:'admin', active:true,  regDate:'2024.01.15', modDate:'2024.02.20' },
-  { name:'박민준',  email:'minjun.park@newdreams.kr',  type:'뉴드림스',  org:'수리개발팀',       role:'user',  active:true,  regDate:'2024.02.03', modDate:'2024.02.03' },
-  { name:'최유나',  email:'yuna.choi@newdreams.kr',    type:'뉴드림스',  org:'본사 스텝',        role:'super', active:true,  regDate:'2024.02.10', modDate:'2024.04.01' },
-  { name:'정다은',  email:'daeun.jung@newdreams.kr',   type:'뉴드림스',  org:'어문개발팀',       role:'user',  active:true,  regDate:'2024.03.01', modDate:'2024.03.01' },
-  { name:'한지호',  email:'jiho.han@newdreams.kr',     type:'생성 계정', org:'대교 강서 Hive',   role:'admin', active:true,  regDate:'2024.03.15', modDate:'2024.03.15' },
-  { name:'강서연',  email:'seoyeon.kang@newdreams.kr', type:'생성 계정', org:'대교 발산 Hive',   role:'user',  active:false, regDate:'2024.04.01', modDate:'2024.04.01' },
-  { name:'윤태양',  email:'taeyang.yoon@newdreams.kr', type:'뉴드림스',  org:'본사 스텝',        role:'super', active:true,  regDate:'2024.04.10', modDate:'2024.04.10' },
-  { name:'박사용자',email:'user@dbank.kr',             type:'생성 계정', org:'[YC]호수백신',     role:'user',  active:true,  regDate:'2024.04.15', modDate:'2024.04.15' },
+  { name:'김수현',  email:'soohyun.kim@daekyo.co.kr',  type:'뉴드림스',  org:'교육콘텐츠실 > 수리개발팀', role:'super', active:true,  regDate:'2024.01.10', modDate:'2024.03.05' },
+  { name:'이지원',  email:'jiwon.lee@daekyo.co.kr',    type:'뉴드림스',  org:'교육콘텐츠실 > 수리개발팀', role:'admin', active:true,  regDate:'2024.01.15', modDate:'2024.02.20' },
+  { name:'박민준',  email:'minjun.park@daekyo.co.kr',  type:'뉴드림스',  org:'교육콘텐츠실 > 수리개발팀', role:'user',  active:true,  regDate:'2024.02.03', modDate:'2024.02.03' },
+  { name:'최유나',  email:'yuna.choi@daekyo.co.kr',    type:'뉴드림스',  org:'경영지원실 > 인사팀',       role:'super', active:true,  regDate:'2024.02.10', modDate:'2024.04.01' },
+  { name:'정다은',  email:'daeun.jung@daekyo.co.kr',   type:'뉴드림스',  org:'교육콘텐츠실 > 어문개발팀', role:'user',  active:true,  regDate:'2024.03.01', modDate:'2024.03.01' },
+  { name:'한지호',  email:'jiho.han@naver.com',         type:'생성 계정', org:'—',                         role:'admin', active:true,  regDate:'2024.03.15', modDate:'2024.03.15' },
+  { name:'강서연',  email:'seoyeon.kang@gmail.com',     type:'생성 계정', org:'—',                         role:'user',  active:false, regDate:'2024.04.01', modDate:'2024.04.01' },
+  { name:'윤태양',  email:'taeyang.yoon@daekyo.co.kr', type:'뉴드림스',  org:'경영지원실 > 재무팀',       role:'super', active:true,  regDate:'2024.04.10', modDate:'2024.04.10' },
+  { name:'박사용자',email:'user.park@naver.com',        type:'생성 계정', org:'—',                         role:'user',  active:true,  regDate:'2024.04.15', modDate:'2024.04.15' },
 ];
 
 let filterText='', filterRoleVal='', filterTypeVal='';
@@ -579,8 +569,8 @@ function getSorted(list){
       return sortDir*(a[sortKey]||'').localeCompare(b[sortKey]||'','ko');
     });
   }
-  const ns=list.filter(u=>u.role!=='super').sort((a,b)=>a.regDate.localeCompare(b.regDate));
-  const ss=list.filter(u=>u.role==='super').sort((a,b)=>a.regDate.localeCompare(b.regDate));
+  const ns=list.filter(u=>u.role!=='super').sort((a,b)=>b.regDate.localeCompare(a.regDate));
+  const ss=list.filter(u=>u.role==='super').sort((a,b)=>b.regDate.localeCompare(a.regDate));
   return [...ns,...ss];
 }
 
@@ -1023,7 +1013,72 @@ function selectLoginOrg(){
   txt.textContent=last;txt.style.color='#111';
 }
 
-/* ── 사용자 추가 탭 전환 ── */
+/* ── 뉴드림스 인물 풀 ── */
+const ND_USER_POOL = [
+  { name:'임명현', sabun:'22007446', org:'디지털개발실 > 학습UX팀',      email:'myunghyun.lim@daekyo.co.kr' },
+  { name:'정소희', sabun:'21006234', org:'디지털개발실 > 학습UX팀',      email:'sohee.jung@daekyo.co.kr' },
+  { name:'한승민', sabun:'23008891', org:'디지털개발실 > 학습UX팀',      email:'seungmin.han@daekyo.co.kr' },
+  { name:'오지은', sabun:'20005123', org:'디지털개발실 > 학습UX팀',      email:'jieun.oh@daekyo.co.kr' },
+  { name:'김도현', sabun:'19004567', org:'디지털개발실 > 플랫폼개발팀', email:'dohyun.kim@daekyo.co.kr' },
+  { name:'박서준', sabun:'20005678', org:'디지털개발실 > 플랫폼개발팀', email:'seojun.park@daekyo.co.kr' },
+  { name:'이채원', sabun:'21006789', org:'디지털개발실 > 플랫폼개발팀', email:'chaewon.lee@daekyo.co.kr' },
+  { name:'최민재', sabun:'22007890', org:'디지털개발실 > 플랫폼개발팀', email:'minjae.choi@daekyo.co.kr' },
+  { name:'윤하준', sabun:'20005321', org:'디지털개발실 > AI서비스팀',   email:'hajun.yoon@daekyo.co.kr' },
+  { name:'강지유', sabun:'21006432', org:'디지털개발실 > AI서비스팀',   email:'jiyu.kang@daekyo.co.kr' },
+  { name:'송예린', sabun:'22007543', org:'디지털개발실 > AI서비스팀',   email:'yerin.song@daekyo.co.kr' },
+  { name:'김수현', sabun:'18003012', org:'교육콘텐츠실 > 수리개발팀',   email:'soohyun.kim@daekyo.co.kr' },
+  { name:'이지원', sabun:'19004123', org:'교육콘텐츠실 > 수리개발팀',   email:'jiwon.lee@daekyo.co.kr' },
+  { name:'박민준', sabun:'20005234', org:'교육콘텐츠실 > 수리개발팀',   email:'minjun.park@daekyo.co.kr' },
+  { name:'정다은', sabun:'19004456', org:'교육콘텐츠실 > 어문개발팀',   email:'daeun.jung@daekyo.co.kr' },
+  { name:'한지수', sabun:'20005567', org:'교육콘텐츠실 > 어문개발팀',   email:'jisu.han@daekyo.co.kr' },
+  { name:'오태양', sabun:'21006678', org:'교육콘텐츠실 > 어문개발팀',   email:'taeyang.oh@daekyo.co.kr' },
+  { name:'배다은', sabun:'17002345', org:'경영지원실 > 인사팀',         email:'daeun.bae@daekyo.co.kr' },
+  { name:'서하린', sabun:'18003456', org:'경영지원실 > 인사팀',         email:'harin.seo@daekyo.co.kr' },
+  { name:'윤태양', sabun:'16001234', org:'경영지원실 > 재무팀',         email:'taeyang.yoon@daekyo.co.kr' },
+  { name:'임채원', sabun:'17002567', org:'경영지원실 > 재무팀',         email:'chaewon.lim@daekyo.co.kr' },
+];
+
+function getNdUserPool(){ return ND_USER_POOL; }
+
+function searchNdUsers(v){
+  const result=document.getElementById('nd-search-result');
+  if(!v.trim()){ result.style.display='none'; return; }
+  const pool=getNdUserPool();
+  const hits=pool.filter(u=>u.name.includes(v)||u.sabun.includes(v)||u.email.includes(v));
+  if(!hits.length){
+    result.innerHTML='<div style="padding:10px 14px;font-size:12px;color:#aaa;">검색 결과가 없습니다</div>';
+    result.style.display='block'; return;
+  }
+  result.innerHTML=hits.map((u,idx)=>`
+    <div onclick="selectNdUser(${idx},'${u.name}','${u.sabun}','${u.email}','${u.org}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px;"
+      onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''">
+      <div style="width:32px;height:32px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#555;flex-shrink:0;">${u.name[0]}</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#111;">${u.name}<span style="font-weight:400;color:#888;margin-left:4px;">[${u.sabun}]</span></div>
+        <div style="font-size:11px;color:#888;margin-top:1px;">${u.org} · ${u.email}</div>
+      </div>
+    </div>
+  `).join('');
+  result.style.display='block';
+}
+
+function selectNdUser(idx, name, sabun, email, org){
+  ndSelectedUser={name:`${name}[${sabun}]`, email, org};
+  document.getElementById('nd-selected-name').textContent=`${name}[${sabun}]`;
+  document.getElementById('nd-selected-email').textContent=email;
+  document.getElementById('nd-selected-org').textContent=org;
+  const info=document.getElementById('nd-selected-info');
+  info.style.display='flex';
+  document.getElementById('nd-search-result').style.display='none';
+  document.getElementById('nd-search-input').value='';
+}
+
+function clearNdSelected(){
+  ndSelectedUser=null;
+  document.getElementById('nd-selected-info').style.display='none';
+  document.getElementById('nd-search-input').value='';
+}
 let createTab = 'new'; // 'new' | 'nd'
 let ndSelectedUser = null;
 
@@ -1089,31 +1144,16 @@ function openCreateModal(){
   // 신규 폼 초기화
   ['create-userid','create-pw','create-name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['userid-err','pw-err'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  document.getElementById('create-userid').classList.remove('err');
-  const txt=document.getElementById('org-selected-text');
-  txt.textContent='클릭하여 조직을 선택하세요';txt.style.color='#aaa';
-  const radio=document.getElementById('org-radio-login');
-  if(radio)radio.checked=false;
+  const uidEl=document.getElementById('create-userid');
+  if(uidEl)uidEl.classList.remove('err');
   // nd 폼 초기화
-  const ndTxt=document.getElementById('nd-org-selected-text');
-  if(ndTxt){ndTxt.textContent='클릭하여 조직 검색 후 계정 선택';ndTxt.style.color='#aaa';}
+  const ndInput=document.getElementById('nd-search-input');
+  if(ndInput)ndInput.value='';
+  const ndResult=document.getElementById('nd-search-result');
+  if(ndResult)ndResult.style.display='none';
   const ndInfo=document.getElementById('nd-selected-info');
   if(ndInfo)ndInfo.style.display='none';
-  orgSel={honbu:'',guk:'',team:'',channel:'',teacher:''};
-  // 로그인 계정 조직 경로 세팅
-  const pathEl=document.getElementById('login-org-path');
-  const labelEl=document.getElementById('login-org-label');
-  const radioEl=document.getElementById('org-radio-login');
-  const orgBox=document.getElementById('login-org-box');
-  if(currentRole==='super'){
-    if(orgBox)orgBox.style.display='none';
-    if(radioEl){radioEl.checked=false;radioEl.disabled=true;}
-  } else {
-    if(orgBox)orgBox.style.display='';
-    if(pathEl)pathEl.textContent=(LOGIN_ORG_MAP[currentRole]||{}).label||'—';
-    if(labelEl)labelEl.style.display='flex';
-    if(radioEl)radioEl.disabled=false;
-  }
+  ndSelectedUser=null;
   openModal('modal-create');
 }
 
@@ -1121,12 +1161,14 @@ function createAccount(){
   const d=today();
 
   if(createTab==='nd'){
-    // 뉴드림스 권한 부여
-    if(!ndSelectedUser){alert('조직 검색에서 계정을 선택해주세요.');return;}
+    if(!ndSelectedUser){alert('검색에서 뉴드림스 계정을 선택해주세요.');return;}
     const role=document.getElementById('nd-role').value;
     const roleLabel=role==='admin'?'관리자':'사용자';
-    if(!confirm(`뉴드림스 계정에 권한을 부여하시겠습니까?\n\n계정: ${ndSelectedUser.name}\n이메일: ${ndSelectedUser.email}\n권한: ${roleLabel}`))return;
+    if(!confirm(`뉴드림스 계정에 권한을 부여하시겠습니까?\n\n계정: ${ndSelectedUser.name}\n이메일: ${ndSelectedUser.email}\n조직: ${ndSelectedUser.org}\n권한: ${roleLabel}`))return;
     accounts.push({name:ndSelectedUser.name, email:ndSelectedUser.email, type:'뉴드림스', org:ndSelectedUser.org, role, active:true, regDate:d, modDate:d});
+    sortKey=''; sortDir=0;
+    document.querySelectorAll('.sort-icon').forEach(el=>el.textContent='↕');
+    currentPage=1;
     renderAccounts();
     closeModal('modal-create');
     alert(`${ndSelectedUser.name} 계정에 '${roleLabel}' 권한이 부여되었습니다.`);
@@ -1144,8 +1186,11 @@ function createAccount(){
   if(!orgParts.length){alert('조직을 선택해주세요.');return;}
   const orgLabel=orgParts[orgParts.length-1];
   if(!confirm(`사용자 계정을 생성하시겠습니까?\n\n아이디: ${uid}\n이름: ${name}\n조직: ${orgLabel}\n권한: 사용자`))return;
-  accounts.push({name, email:uid, type:'생성 계정', org:orgLabel, role:'user', active:true, regDate:d, modDate:d});
+  accounts.push({name, email:uid, type:'생성 계정', org:'—', role:'user', active:true, regDate:d, modDate:d});
   USER_DB.push({email:uid, pw, role:'user', name, avatar:name[0]});
+  sortKey=''; sortDir=0;
+  document.querySelectorAll('.sort-icon').forEach(el=>el.textContent='↕');
+  currentPage=1;
   renderAccounts();
   closeModal('modal-create');
   alert('사용자 계정이 생성되었습니다.');
