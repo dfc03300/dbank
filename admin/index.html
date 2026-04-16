@@ -1182,10 +1182,7 @@ function createAccount(){
   if(!validateUserId()||!uid){alert('아이디를 올바른 이메일 형식으로 입력해주세요.');return;}
   if(!pw||pw.length<8){alert('비밀번호를 8자 이상 입력해주세요.');return;}
   if(!name){alert('이름을 입력해주세요.');return;}
-  const orgParts=[orgSel.honbu,orgSel.guk,orgSel.team,orgSel.channel].filter(Boolean);
-  if(!orgParts.length){alert('조직을 선택해주세요.');return;}
-  const orgLabel=orgParts[orgParts.length-1];
-  if(!confirm(`사용자 계정을 생성하시겠습니까?\n\n아이디: ${uid}\n이름: ${name}\n조직: ${orgLabel}\n권한: 사용자`))return;
+  if(!confirm(`사용자 계정을 생성하시겠습니까?\n\n아이디: ${uid}\n이름: ${name}\n권한: 사용자`))return;
   accounts.push({name, email:uid, type:'생성 계정', org:'—', role:'user', active:true, regDate:d, modDate:d});
   USER_DB.push({email:uid, pw, role:'user', name, avatar:name[0]});
   sortKey=''; sortDir=0;
