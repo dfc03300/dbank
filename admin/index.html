@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -631,11 +632,16 @@ function renderAccounts(){
     }
     let activeCell;
     if(isS){
+      // 슈퍼어드민 계정: 항상 잠금
       activeCell=`<span class="toggle on" style="cursor:default;opacity:0.4;"></span>`;
+    } else if(u.role==='admin' && currentRole==='admin'){
+      // 관리자가 관리자 계정 활성을 변경 불가
+      activeCell=`<span class="toggle ${u.active?'on':'off'}" style="cursor:not-allowed;opacity:0.4;" title="관리자 계정 활성은 변경할 수 없습니다"></span>`;
     } else if(canEdit()){
-      activeCell=`<span class="toggle ${u.active?'on':'off'}" data-idx="${i}" onclick="toggleActive(this)"></span>`;
+      // 활성 상태: 파란 토글 / 비활성 상태: 진한 회색(#6b7280)으로 명확히 구분
+      activeCell=`<span class="toggle ${u.active?'on':'off'}" data-idx="${i}" onclick="toggleActive(this)" style="${u.active?'':'background:#6b7280;'}"></span>`;
     } else {
-      activeCell=`<span class="toggle ${u.active?'on':'off'}" style="cursor:default;opacity:0.6;"></span>`;
+      activeCell=`<span class="toggle ${u.active?'on':'off'}" style="cursor:default;opacity:0.6;${u.active?'':'background:#6b7280;'}"></span>`;
     }
     tr.innerHTML=`
       <td style="color:#999;font-size:12px;">${num}</td>
